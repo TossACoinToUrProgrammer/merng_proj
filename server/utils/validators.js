@@ -15,7 +15,7 @@ module.exports.validateRegisterInput = (
     //формат почты
     const regEx = /^([0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*@([0-9a-zA-Z][-\w]*[0-9a-zA-Z]\.)+[a-zA-Z]{2,9})$/;
     if (!email.match(regEx)) {
-      errors.email = "Email muste be valid email address";
+      errors.email = "Email must be valid email address";
     }
   }
   if (password === "") {
