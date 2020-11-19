@@ -1,8 +1,11 @@
 import { useMutation } from "@apollo/client";
 import gql from "graphql-tag";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Button, Form, Message } from "semantic-ui-react";
+import { ErrorMessage } from "../components/ErrorMessage";
 import Preloader from "../components/Preloader";
+import { AuthContext } from "../context/auth";
+import { useForm } from "../utils/hooks";
 
 const REGISTER_USER_MUTATION = gql`
   mutation register(
@@ -29,22 +32,21 @@ const REGISTER_USER_MUTATION = gql`
 `;
 
 const Register = (props) => {
+  const context = useContext(AuthContext);
   const [errors, setErrors] = useState();
-  const [state, setState] = useState({});
-  const {
-    username = "",
-    email = "",
-    password = "",
-    confirmPassword = "",
-  } = state;
 
-  const onChange = (e) => {
-    setState({ ...state, [e.target.name]: e.target.value });
-  };
+  const { onChange, onSubmit, values } = useForm(registerUser, {
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
   const [addUser, { loading }] = useMutation(REGISTER_USER_MUTATION, {
     //on success mutation
-    update(_, result) {
-      props.history.push('/');
+    update(_, { data: { register: userData}}) {
+      context.login(userData);
+      props.history.push("/");
     },
     onError(err) {
       setErrors(
@@ -53,12 +55,14 @@ const Register = (props) => {
           : err
       );
     },
-    variables: state,
+    variables: values,
   });
-  const onSubmit = (e) => {
-    e.preventDefault();
+
+  function registerUser() {
     addUser();
-  };
+  }
+
+  const { username, email, password, confirmPassword } = values;
 
   return (
     <>
@@ -75,7 +79,7 @@ const Register = (props) => {
             onChange={onChange}
             value={username}
             error={errors && errors.username}
-            />
+          />
           <Form.Input
             label="Email"
             placeholder="email..."
@@ -83,7 +87,7 @@ const Register = (props) => {
             onChange={onChange}
             value={email}
             error={errors && errors.email}
-            />
+          />
           <Form.Input
             label="Password"
             placeholder="password..."
@@ -92,7 +96,7 @@ const Register = (props) => {
             onChange={onChange}
             value={password}
             error={errors && errors.password}
-            />
+          />
           <Form.Input
             label="Confirm password"
             placeholder="confirm password..."
@@ -101,21 +105,11 @@ const Register = (props) => {
             onChange={onChange}
             value={confirmPassword}
             error={errors && errors.confirmPassword}
-            />
+          />
           {loading ? <Preloader /> : <Button primary>Submit</Button>}
 
           {errors && (
-            <Message
-              error
-              header="Error"
-              content={
-                Object.keys(errors).length > 0
-                  ? Object.values(errors)
-                      .map((err) => err)
-                      .join(". ")
-                  : errors
-              }
-            />
+            <ErrorMessage error={errors} />
           )}
         </Form>
       </div>
