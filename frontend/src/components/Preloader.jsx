@@ -1,9 +1,9 @@
 import React from 'react';
 import { Loader  } from 'semantic-ui-react';
 
-const Preloader = () => (
+const Preloader = ({size='medium'}) => (
     <div>
-        <Loader active inline='centered' />
+        <Loader size={size} active inline='centered' />
     </div>
   )
   

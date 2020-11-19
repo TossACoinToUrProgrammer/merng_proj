@@ -15,7 +15,7 @@ const Home = () => {
     loading,
     data: { getPosts: posts = [] } = {},
   } = useQuery(FETCH_POSTS_QUERY);
-
+  
   return (
     <Grid columns={3} divided>
       <Grid.Row>
@@ -31,6 +31,9 @@ const Home = () => {
           <Preloader />
         ) : (
           posts.map((post) => {
+            const likePostHandler = () => {
+
+            }
             return (
               <Grid.Column key={post.id} style={{marginBottom: "20px"}}>
                 <PostCard post={post} />

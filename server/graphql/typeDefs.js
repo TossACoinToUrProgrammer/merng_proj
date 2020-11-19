@@ -47,10 +47,10 @@ module.exports = gql`
       register(registerInput: RegisterInput): User!
       login(loginInput: LoginInput): User!
       createPost(body: String!): Post!
-      deletePost(id: ID!): String!        
+      deletePost(id: ID!): Post!        
       createComment(postId: ID!, body: String!): Post!
       deleteComment(postId: ID!, commentId: ID!): Post!
-      likePost(postId: ID!): String!
+      likePost(postId: ID!): Post!
   }
   type Subscription {
     newPost: Post!

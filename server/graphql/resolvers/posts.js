@@ -51,7 +51,7 @@ module.exports = {
 
         if (user.id == post.user) {
           await post.delete();
-          return "Post deleted succesfully!";
+          return post;
         } else {
           throw new Error("You are not allowed to delete this post");
         }
@@ -72,7 +72,7 @@ module.exports = {
         }
 
         await post.save();
-        return "Succesfully liked";
+        return post;
       } catch (err) {
         throw new UserInputError("Post not found");
       }
