@@ -10,11 +10,7 @@ module.exports = {
       const { username } = checkAuth(context);
 
       if (body.trim() === "") {
-        throw new UserInputError("Comment is empty", {
-          errors: {
-            body: "Comment must be not empty",
-          },
-        });
+        throw new Error('Comment must not be empty');
       }
 
       try {

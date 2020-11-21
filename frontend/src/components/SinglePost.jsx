@@ -1,14 +1,24 @@
 import React, { useContext } from "react";
-import { useQuery } from "@apollo/client";
-import { Button, Card, Grid, Icon, Image, Label } from "semantic-ui-react";
+import { useMutation, useQuery } from "@apollo/client";
+import {
+  Button,
+  Card,
+  Form,
+  Grid,
+  Icon,
+  Image,
+  Label,
+  TransitionGroup,
+} from "semantic-ui-react";
 import moment from "moment";
 
-import { FETCH_POST_QUERY } from "../utils/graphql";
+import { CREATE_COMMENT_MUTATION, FETCH_POST_QUERY, FETCH_POSTS_QUERY } from "../utils/graphql";
 import Preloader from "./Preloader";
 import LikeButton from "./LikeButton";
 import { AuthContext } from "../context/auth";
-import { Link } from "react-router-dom";
-import DeleteButton from "./DeleteButton";
+import { useForm } from "../utils/hooks";
+import DeletePostButton from "./DeletePostButton";
+import DeleteCommentButton from "./DeleteCommentButton";
 
 const SinglePost = (props) => {
   const id = props.match.params.postId;
@@ -21,6 +31,17 @@ const SinglePost = (props) => {
       variables: { id },
     }
   );
+
+  const { onChange, onSubmit, values } = useForm(submitHandler, {
+    commentBody: "",
+  });
+
+  const [createComment, { loading: isCommentLoading, error}] = useMutation(CREATE_COMMENT_MUTATION, {
+    variables: { body: values.commentBody, postId: id },
+    onError(err) {
+      console.log(err);
+    },
+  });
 
   if (!id) return <h3>Post id is not provided</h3>;
 
@@ -38,7 +59,11 @@ const SinglePost = (props) => {
   } = post;
 
   const deletePostCallback = () => {
-      props.history.push('/');
+    props.history.push("/");
+  };
+
+  function submitHandler() {
+    createComment();
   }
 
   return (
@@ -76,9 +101,56 @@ const SinglePost = (props) => {
                       {commentsCount}
                     </Label>
                   </Button>
-                  <DeleteButton callback={deletePostCallback} post={{ id: postId }} />
+                  <DeletePostButton
+                    callback={deletePostCallback}
+                    post={{ id: postId }}
+                  />
                 </Card.Content>
               </Card>
+              <Form onSubmit={onSubmit}>
+                <Grid>
+                  <Grid.Row>
+                    <Grid.Column width={13}>
+                      <Form.Input
+                      error={error}
+                        value={values.commentBody}
+                        onChange={onChange}
+                        name="commentBody"
+                        placeholder="Type comment..."
+                      />
+                    </Grid.Column>
+                    <Grid.Column width={3}>
+                        <Button color="teal">{isCommentLoading ? <Preloader size='mini' /> : 'Comment'}</Button>
+                    </Grid.Column>
+
+                  </Grid.Row>
+                </Grid>
+              </Form>
+              {error && 
+                  <TransitionGroup>
+                    <div
+                      className="ui error message"
+                      style={{ marginBottom: 20 }}
+                    >
+                      <ul className="list">
+                        <li>
+                          error
+                        </li>
+                      </ul>
+                    </div>
+                  </TransitionGroup>}
+              {comments.map((comment) => (
+                <Card fluid key={comment.id}>
+                  <Card.Content>
+                    {user && user.username === comment.username && (
+                      <DeleteCommentButton postId={id} commentId={comment.id} />
+                    )}
+                  <Card.Header>{comment.username}</Card.Header>
+                  <Card.Meta>{moment(comment.createdAt).fromNow()}</Card.Meta>
+                  <Card.Description>{comment.body}</Card.Description>
+                  </Card.Content>
+                </Card>
+              ))}
             </Grid.Column>
           </Grid.Row>
         </Grid>
